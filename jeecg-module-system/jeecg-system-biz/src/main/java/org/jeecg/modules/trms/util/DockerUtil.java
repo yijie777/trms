@@ -1,4 +1,4 @@
-package org.sju.modules.system.util;
+package org.jeecg.modules.trms.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
@@ -6,6 +6,9 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
+import org.jeecg.modules.trms.entity.TrmsDockerContainer;
+import org.jeecg.modules.trms.entity.TrmsDockerContainerPorts;
+import org.jeecg.modules.trms.entity.TrmsDockerNetworkSettings;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -14,13 +17,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class DockerUtil{
+public class DockerUtil {
     public static void main(String[] args) throws IOException {
         DockerClient client = connectDocker();
         List<CreateContainerResponse> containers = createContainers(client, "1");
-        for (CreateContainerResponse container : containers) {
-            getContainerInfo(client, container.getId());
-        }
+        getContainerInfo(client, containers);
+
 //        System.out.println(slave1Test);
 //        int inputPort = 40000;
 //        System.out.println("输入端口：" + inputPort + ", 递增递归找到可用端口为：" + getUsablePort(inputPort));
@@ -32,7 +34,6 @@ public class DockerUtil{
     }
 
 
-
     public static List<Container> getContainerList(DockerClient client) {
         return client.listContainersCmd().exec();
     }
@@ -41,19 +42,54 @@ public class DockerUtil{
      * 获取容器信息
      *
      * @param client 连接
-     * @param id     容器id
      * @return object
      */
-    public static Object getContainerInfo(DockerClient client, String id) {
-        InspectContainerResponse exec = client.inspectContainerCmd(id).exec();
-        Ports ports = exec.getNetworkSettings().getPorts();
-        Map<ExposedPort, Ports.Binding[]> bindings = ports.getBindings();
-        for (Map.Entry<ExposedPort, Ports.Binding[]> exposedPortEntry : bindings.entrySet()) {
-            Integer portOut = exposedPortEntry.getKey().getPort();
-            List<Ports.Binding> collect = Arrays.stream(exposedPortEntry.getValue()).collect(Collectors.toList());
-            System.out.println("内部端口：" + portOut + "-----映射端口：" + collect.get(0).getHostPortSpec());
+    public static Object getContainerInfo(DockerClient client, List<CreateContainerResponse> containers) {
+
+        for (CreateContainerResponse container : containers) {
+            TrmsDockerContainer trmsDockerContainer = new TrmsDockerContainer();
+            ArrayList<TrmsDockerContainerPorts> trmsDockerContainerPortsArrayList = new ArrayList<>();
+            ArrayList<TrmsDockerNetworkSettings> trmsDockerNetworkSettingsArrayList = new ArrayList<>();
+
+
+            String id = container.getId();
+            InspectContainerResponse exec = client.inspectContainerCmd(id).exec();
+            Ports ports = exec.getNetworkSettings().getPorts();
+            Map<ExposedPort, Ports.Binding[]> bindings = ports.getBindings();
+
+
+            trmsDockerContainer.setName(exec.getName());
+            trmsDockerContainer.setId64(exec.getId());
+            trmsDockerContainer.setState(exec.getState().getStatus());
+            trmsDockerContainer.setCommand(exec.getPath());
+            trmsDockerContainer.setImageId64(exec.getImageId());
+//            trmsDockerContainer.setImage(exec.);
+            //            2023-09-06T15:10:06.479610547Z
+//            trmsDockerContainer.setCreateTime();
+
+
+            for (Map.Entry<ExposedPort, Ports.Binding[]> exposedPortEntry : bindings.entrySet()) {
+                TrmsDockerContainerPorts port = new TrmsDockerContainerPorts();
+                int PrivatePort = exposedPortEntry.getKey().getPort();
+                List<Ports.Binding> collect = Arrays.stream(exposedPortEntry.getValue()).collect(Collectors.toList());
+                System.out.println("内部端口：" + PrivatePort + "-----映射端口：" + collect.get(0).getHostPortSpec());
+                port.setPrivatePort(PrivatePort);
+                port.setPublicPort(Integer.getInteger(collect.get(0).getHostPortSpec()));
+                trmsDockerContainerPortsArrayList.add(port);
+            }
+            for (Map.Entry<String, ContainerNetwork> stringContainerNetworkEntry : exec.getNetworkSettings().getNetworks().entrySet()) {
+                TrmsDockerNetworkSettings network = new TrmsDockerNetworkSettings();
+                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
+                network.setNetworkName(stringContainerNetworkEntry.getKey());
+                network.setIpAddress(stringContainerNetworkEntry.getValue().getIpAddress());
+                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
+                network.setIpPrefixLen(stringContainerNetworkEntry.getValue().getIpPrefixLen());
+                network.setMacAddress(stringContainerNetworkEntry.getValue().getMacAddress());
+                network.setId64(stringContainerNetworkEntry.getValue().getNetworkID());
+                trmsDockerNetworkSettingsArrayList.add(network);
+            }
+
         }
-        System.out.println(exec);
         return null;
     }
 
