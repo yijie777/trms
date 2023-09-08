@@ -43,7 +43,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  * @Date:   2023-09-08
  * @Version: V1.0
  */
-@Api(tags="课程表")
+@Api(tags="A 课程表")
 @RestController
 @RequestMapping("/trms/trmsCourse")
 @Slf4j

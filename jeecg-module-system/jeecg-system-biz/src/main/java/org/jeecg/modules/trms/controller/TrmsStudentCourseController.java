@@ -50,7 +50,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  * @Date: 2023-09-08
  * @Version: V1.0
  */
-@Api(tags = "学生选课表")
+@Api(tags = "A 学生选课表")
 @RestController
 @RequestMapping("/trms/trmsStudentCourse")
 @Slf4j
@@ -89,7 +89,7 @@ public class TrmsStudentCourseController extends JeecgController<TrmsStudentCour
             record.setCourse(trmsCourseService.getById(record.getCourseId()));
             List<InspectContainerResponse> docker = new ArrayList<>();
             for (String id : record.getContainerList().split(",")) {
-                docker.add(DockerUtil.getContainerById(id));
+                docker.add(DockerUtil.inspectContainer(id));
             }
             record.setDocker(docker);
         }

@@ -43,7 +43,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  * @Date:   2023-09-06
  * @Version: V1.0
  */
-@Api(tags="a-镜像管理")
+@Api(tags="A 镜像管理")
 @RestController
 @RequestMapping("/trms/trmsDockerImage")
 @Slf4j

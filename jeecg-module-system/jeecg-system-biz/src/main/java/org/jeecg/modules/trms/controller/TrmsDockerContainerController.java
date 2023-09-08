@@ -51,7 +51,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  * @Date:   2023-09-06
  * @Version: V1.0
  */
-@Api(tags="a-容器管理")
+@Api(tags="A 容器管理")
 @RestController
 @RequestMapping("/trms/trmsDockerContainer")
 @Slf4j

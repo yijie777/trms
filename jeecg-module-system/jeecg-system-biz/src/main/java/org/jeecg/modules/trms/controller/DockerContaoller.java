@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-@Api(tags="a-Docker操作")
+@Api(tags="A Docker操作")
 @Slf4j
 @RestController
 @RequestMapping("/trms/docker")
@@ -48,10 +48,8 @@ public class DockerContaoller {
 //    @RequiresPermissions("trms:trms_docker_container:add")
     @RequestMapping(value = "/createMaster", method = RequestMethod.POST)
     public Result<String> createMaster(@RequestBody Object params) {
-
         DockerClient client = DockerUtil.client;
-        List<CreateContainerResponse> containers = DockerUtil.createContainers(client, "1");
-
+        List<CreateContainerResponse> containers = DockerUtil.createContainersHA(client, "1","100net","v3");
         for (CreateContainerResponse container : containers) {
             TrmsDockerContainer trmsDockerContainer = new TrmsDockerContainer();
             ArrayList<TrmsDockerContainerPorts> trmsDockerContainerPortsArrayList = new ArrayList<>();
@@ -104,10 +102,10 @@ public class DockerContaoller {
 //    public Result<String> add(@RequestBody TrmsDockerContainerPage trmsDockerContainerPage) {
 //        return Result.OK("添加成功！");
 //    }
-    @ApiOperation(value="课程表-通过id查询", notes="课程表-通过id查询 ")
+    @ApiOperation(value="容器-通过id查询", notes="容器-通过id查询 ")
     @GetMapping(value = "/queryById")
     public Result<InspectContainerResponse> queryById(@RequestParam(name="id",required=true) String id) {
-        InspectContainerResponse containerById = DockerUtil.getContainerById(id);
+        InspectContainerResponse containerById = DockerUtil.inspectContainer(id);
         return Result.OK(containerById);
     }
 

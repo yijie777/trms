@@ -15,10 +15,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 public class DockerUtil {
-    public  static DockerClient client;
+    public static DockerClient client;
 
     @PostConstruct
     public void init() {
@@ -29,7 +30,7 @@ public class DockerUtil {
         DockerClient client = connectDocker();
 //        List<CreateContainerResponse> containers = createContainers(client, "1");
 //        getContainerInfo(client, containers);
-        createNetwork(client, "test");
+//        createNetwork(client, "test");
 //        System.out.println(slave1Test);
 //        int inputPort = 40000;
 //        System.out.println("输入端口：" + inputPort + ", 递增递归找到可用端口为：" + getUsablePort(inputPort));
@@ -49,58 +50,24 @@ public class DockerUtil {
     public static List<Container> getContainerList(DockerClient client) {
         return client.listContainersCmd().exec();
     }
-    public static InspectContainerResponse getContainerById(String id) {
-       return client.inspectContainerCmd(id).exec();
+
+    /**
+     * 获取单个容器信息
+     *
+     * @param id
+     * @return
+     */
+    public static InspectContainerResponse inspectContainer(String id) {
+        return client.inspectContainerCmd(id).exec();
     }
 
-//    public static Object getContainerInfo(DockerClient client, List<CreateContainerResponse> containers) {
-//
-//        for (CreateContainerResponse container : containers) {
-//            TrmsDockerContainer trmsDockerContainer = new TrmsDockerContainer();
-//            ArrayList<TrmsDockerContainerPorts> trmsDockerContainerPortsArrayList = new ArrayList<>();
-//            ArrayList<TrmsDockerNetworkSettings> trmsDockerNetworkSettingsArrayList = new ArrayList<>();
-//
-//
-//            String id = container.getId();
-//            InspectContainerResponse exec = client.inspectContainerCmd(id).exec();
-//            Ports ports = exec.getNetworkSettings().getPorts();
-//            Map<ExposedPort, Ports.Binding[]> bindings = ports.getBindings();
-//
-//
-//            trmsDockerContainer.setName(exec.getName());
-//            trmsDockerContainer.setId64(exec.getId());
-//            trmsDockerContainer.setState(exec.getState().getStatus());
-//            trmsDockerContainer.setCommand(exec.getPath());
-//            trmsDockerContainer.setImageId64(exec.getImageId());
-////            trmsDockerContainer.setImage(exec.);
-//            //            2023-09-06T15:10:06.479610547Z
-////            trmsDockerContainer.setCreateTime();
-//
-//
-//            for (Map.Entry<ExposedPort, Ports.Binding[]> exposedPortEntry : bindings.entrySet()) {
-//                TrmsDockerContainerPorts port = new TrmsDockerContainerPorts();
-//                int PrivatePort = exposedPortEntry.getKey().getPort();
-//                List<Ports.Binding> collect = Arrays.stream(exposedPortEntry.getValue()).collect(Collectors.toList());
-//                System.out.println("内部端口：" + PrivatePort + "-----映射端口：" + collect.get(0).getHostPortSpec());
-//                port.setPrivatePort(PrivatePort);
-//                port.setPublicPort(Integer.getInteger(collect.get(0).getHostPortSpec()));
-//                trmsDockerContainerPortsArrayList.add(port);
-//            }
-//            for (Map.Entry<String, ContainerNetwork> stringContainerNetworkEntry : exec.getNetworkSettings().getNetworks().entrySet()) {
-//                TrmsDockerNetworkSettings network = new TrmsDockerNetworkSettings();
-//                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
-//                network.setNetworkName(stringContainerNetworkEntry.getKey());
-//                network.setIpAddress(stringContainerNetworkEntry.getValue().getIpAddress());
-//                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
-//                network.setIpPrefixLen(stringContainerNetworkEntry.getValue().getIpPrefixLen());
-//                network.setMacAddress(stringContainerNetworkEntry.getValue().getMacAddress());
-//                network.setId64(stringContainerNetworkEntry.getValue().getNetworkID());
-//                trmsDockerNetworkSettingsArrayList.add(network);
-//            }
-//
-//        }
-//        return null;
-//    }
+    /**
+     * 返回镜像列表
+     * @return
+     */
+    public static List<Image> listImages() {
+        return client.listImagesCmd().exec();
+    }
 
     /**
      * 建立连接
@@ -122,8 +89,15 @@ public class DockerUtil {
      * @param name   网络名
      */
     public static void createNetwork(DockerClient client, String name) {
-
-        client.createNetworkCmd().withName(name).withIpam(new Network.Ipam().withConfig(new Network.Ipam.Config().withSubnet("172.36.5.0/29").withGateway("172.36.5.1"))).withDriver("bridge").exec();
+        client.createNetworkCmd()
+                .withName(name)
+                .withIpam(
+                new Network.Ipam().withConfig(
+                        new Network.Ipam.Config()
+                                .withSubnet("172.36.5.0/29")
+                                .withGateway("172.36.5.1")))
+                .withDriver("bridge")
+                .exec();
     }
 
     /**
@@ -133,13 +107,13 @@ public class DockerUtil {
      * @param id     创建人id
      * @return 集群信息列表
      */
-    public static List<CreateContainerResponse> createContainers(DockerClient client, String id) {
+    public static List<CreateContainerResponse> createContainersHA(DockerClient client, String id, String networkName, String tag) {
         id = id + UUID.randomUUID();
-        String networkName = UUID.randomUUID().toString();
-        createNetwork(client, networkName);
-        CreateContainerResponse master = createMaster(client, "master_" + id, "master:v3", networkName);
-        CreateContainerResponse slave1 = createSlave1(client, "slave1_" + id, "slave1:v3", networkName);
-        CreateContainerResponse slave2 = createSlave2(client, "slave2_" + id, "slave2:v3", networkName);
+//        String networkName = UUID.randomUUID().toString();
+//        createNetwork(client, networkName);
+        CreateContainerResponse master = createMaster(client, "master_" + id, "master:" + tag, networkName);
+        CreateContainerResponse slave1 = createSlave1(client, "slave1_" + id, "slave1:" + tag, networkName);
+        CreateContainerResponse slave2 = createSlave2(client, "slave2_" + id, "slave2:" + tag, networkName);
         List<CreateContainerResponse> list = new ArrayList<>();
         list.add(master);
         list.add(slave1);
