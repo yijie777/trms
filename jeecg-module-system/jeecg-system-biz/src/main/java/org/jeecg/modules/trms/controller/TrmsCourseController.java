@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.util.oConvertUtils;
-import org.jeecg.modules.trms.entity.TrmsDockerImage;
-import org.jeecg.modules.trms.service.ITrmsDockerImageService;
+import org.jeecg.modules.trms.entity.TrmsCourse;
+import org.jeecg.modules.trms.service.ITrmsCourseService;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -38,68 +38,68 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
  /**
- * @Description: 镜像管理
+ * @Description: 课程表
  * @Author: jeecg-boot
- * @Date:   2023-09-06
+ * @Date:   2023-09-08
  * @Version: V1.0
  */
-@Api(tags="a-镜像管理")
+@Api(tags="课程表")
 @RestController
-@RequestMapping("/trms/trmsDockerImage")
+@RequestMapping("/trms/trmsCourse")
 @Slf4j
-public class TrmsDockerImageController extends JeecgController<TrmsDockerImage, ITrmsDockerImageService> {
+public class TrmsCourseController extends JeecgController<TrmsCourse, ITrmsCourseService> {
 	@Autowired
-	private ITrmsDockerImageService trmsDockerImageService;
+	private ITrmsCourseService trmsCourseService;
 	
 	/**
 	 * 分页列表查询
 	 *
-	 * @param trmsDockerImage
+	 * @param trmsCourse
 	 * @param pageNo
 	 * @param pageSize
 	 * @param req
 	 * @return
 	 */
-	//@AutoLog(value = "镜像管理-分页列表查询")
-	@ApiOperation(value="镜像管理-分页列表查询", notes="镜像管理-分页列表查询")
+	//@AutoLog(value = "课程表-分页列表查询")
+	@ApiOperation(value="课程表-分页列表查询", notes="课程表-分页列表查询")
 	@GetMapping(value = "/list")
-	public Result<IPage<TrmsDockerImage>> queryPageList(TrmsDockerImage trmsDockerImage,
+	public Result<IPage<TrmsCourse>> queryPageList(TrmsCourse trmsCourse,
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
 								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
 								   HttpServletRequest req) {
-		QueryWrapper<TrmsDockerImage> queryWrapper = QueryGenerator.initQueryWrapper(trmsDockerImage, req.getParameterMap());
-		Page<TrmsDockerImage> page = new Page<TrmsDockerImage>(pageNo, pageSize);
-		IPage<TrmsDockerImage> pageList = trmsDockerImageService.page(page, queryWrapper);
+		QueryWrapper<TrmsCourse> queryWrapper = QueryGenerator.initQueryWrapper(trmsCourse, req.getParameterMap());
+		Page<TrmsCourse> page = new Page<TrmsCourse>(pageNo, pageSize);
+		IPage<TrmsCourse> pageList = trmsCourseService.page(page, queryWrapper);
 		return Result.OK(pageList);
 	}
 	
 	/**
 	 *   添加
 	 *
-	 * @param trmsDockerImage
+	 * @param trmsCourse
 	 * @return
 	 */
-	@AutoLog(value = "镜像管理-添加")
-	@ApiOperation(value="镜像管理-添加", notes="镜像管理-添加")
-	@RequiresPermissions("trms:trms_docker_image:add")
+	@AutoLog(value = "课程表-添加")
+	@ApiOperation(value="课程表-添加", notes="课程表-添加")
+	@RequiresPermissions("trms:trms_course:add")
 	@PostMapping(value = "/add")
-	public Result<String> add(@RequestBody TrmsDockerImage trmsDockerImage) {
-		trmsDockerImageService.save(trmsDockerImage);
+	public Result<String> add(@RequestBody TrmsCourse trmsCourse) {
+		trmsCourseService.save(trmsCourse);
 		return Result.OK("添加成功！");
 	}
 	
 	/**
 	 *  编辑
 	 *
-	 * @param trmsDockerImage
+	 * @param trmsCourse
 	 * @return
 	 */
-	@AutoLog(value = "镜像管理-编辑")
-	@ApiOperation(value="镜像管理-编辑", notes="镜像管理-编辑")
-	@RequiresPermissions("trms:trms_docker_image:edit")
+	@AutoLog(value = "课程表-编辑")
+	@ApiOperation(value="课程表-编辑", notes="课程表-编辑")
+	@RequiresPermissions("trms:trms_course:edit")
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
-	public Result<String> edit(@RequestBody TrmsDockerImage trmsDockerImage) {
-		trmsDockerImageService.updateById(trmsDockerImage);
+	public Result<String> edit(@RequestBody TrmsCourse trmsCourse) {
+		trmsCourseService.updateById(trmsCourse);
 		return Result.OK("编辑成功!");
 	}
 	
@@ -109,12 +109,12 @@ public class TrmsDockerImageController extends JeecgController<TrmsDockerImage, 
 	 * @param id
 	 * @return
 	 */
-	@AutoLog(value = "镜像管理-通过id删除")
-	@ApiOperation(value="镜像管理-通过id删除", notes="镜像管理-通过id删除")
-	@RequiresPermissions("trms:trms_docker_image:delete")
+	@AutoLog(value = "课程表-通过id删除")
+	@ApiOperation(value="课程表-通过id删除", notes="课程表-通过id删除")
+	@RequiresPermissions("trms:trms_course:delete")
 	@DeleteMapping(value = "/delete")
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
-		trmsDockerImageService.removeById(id);
+		trmsCourseService.removeById(id);
 		return Result.OK("删除成功!");
 	}
 	
@@ -124,12 +124,12 @@ public class TrmsDockerImageController extends JeecgController<TrmsDockerImage, 
 	 * @param ids
 	 * @return
 	 */
-	@AutoLog(value = "镜像管理-批量删除")
-	@ApiOperation(value="镜像管理-批量删除", notes="镜像管理-批量删除")
-	@RequiresPermissions("trms:trms_docker_image:deleteBatch")
+	@AutoLog(value = "课程表-批量删除")
+	@ApiOperation(value="课程表-批量删除", notes="课程表-批量删除")
+	@RequiresPermissions("trms:trms_course:deleteBatch")
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
-		this.trmsDockerImageService.removeByIds(Arrays.asList(ids.split(",")));
+		this.trmsCourseService.removeByIds(Arrays.asList(ids.split(",")));
 		return Result.OK("批量删除成功!");
 	}
 	
@@ -139,27 +139,27 @@ public class TrmsDockerImageController extends JeecgController<TrmsDockerImage, 
 	 * @param id
 	 * @return
 	 */
-	//@AutoLog(value = "镜像管理-通过id查询")
-	@ApiOperation(value="镜像管理-通过id查询", notes="镜像管理-通过id查询")
+	//@AutoLog(value = "课程表-通过id查询")
+	@ApiOperation(value="课程表-通过id查询", notes="课程表-通过id查询 ")
 	@GetMapping(value = "/queryById")
-	public Result<TrmsDockerImage> queryById(@RequestParam(name="id",required=true) String id) {
-		TrmsDockerImage trmsDockerImage = trmsDockerImageService.getById(id);
-		if(trmsDockerImage==null) {
+	public Result<TrmsCourse> queryById(@RequestParam(name="id",required=true) String id) {
+		TrmsCourse trmsCourse = trmsCourseService.getById(id);
+		if(trmsCourse==null) {
 			return Result.error("未找到对应数据");
 		}
-		return Result.OK(trmsDockerImage);
+		return Result.OK(trmsCourse);
 	}
 
     /**
     * 导出excel
     *
     * @param request
-    * @param trmsDockerImage
+    * @param trmsCourse
     */
-    @RequiresPermissions("trms:trms_docker_image:exportXls")
+    @RequiresPermissions("trms:trms_course:exportXls")
     @RequestMapping(value = "/exportXls")
-    public ModelAndView exportXls(HttpServletRequest request, TrmsDockerImage trmsDockerImage) {
-        return super.exportXls(request, trmsDockerImage, TrmsDockerImage.class, "镜像管理");
+    public ModelAndView exportXls(HttpServletRequest request, TrmsCourse trmsCourse) {
+        return super.exportXls(request, trmsCourse, TrmsCourse.class, "课程表");
     }
 
     /**
@@ -169,10 +169,10 @@ public class TrmsDockerImageController extends JeecgController<TrmsDockerImage, 
     * @param response
     * @return
     */
-    @RequiresPermissions("trms:trms_docker_image:importExcel")
+    @RequiresPermissions("trms:trms_course:importExcel")
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
-        return super.importExcel(request, response, TrmsDockerImage.class);
+        return super.importExcel(request, response, TrmsCourse.class);
     }
 
 }

@@ -6,23 +6,30 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
-import org.jeecg.modules.trms.entity.TrmsDockerContainer;
-import org.jeecg.modules.trms.entity.TrmsDockerContainerPorts;
-import org.jeecg.modules.trms.entity.TrmsDockerNetworkSettings;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
-
-
+@Slf4j
+@Component
 public class DockerUtil {
+    public  static DockerClient client;
+
+    @PostConstruct
+    public void init() {
+        client = connectDocker();
+    }
+
     public static void main(String[] args) throws IOException {
         DockerClient client = connectDocker();
-        List<CreateContainerResponse> containers = createContainers(client, "1");
-        getContainerInfo(client, containers);
-
+//        List<CreateContainerResponse> containers = createContainers(client, "1");
+//        getContainerInfo(client, containers);
+        createNetwork(client, "test");
 //        System.out.println(slave1Test);
 //        int inputPort = 40000;
 //        System.out.println("输入端口：" + inputPort + ", 递增递归找到可用端口为：" + getUsablePort(inputPort));
@@ -33,65 +40,67 @@ public class DockerUtil {
 
     }
 
-
+    /**
+     * 获取容器列表
+     *
+     * @param client
+     * @return
+     */
     public static List<Container> getContainerList(DockerClient client) {
         return client.listContainersCmd().exec();
     }
-
-    /**
-     * 获取容器信息
-     *
-     * @param client 连接
-     * @return object
-     */
-    public static Object getContainerInfo(DockerClient client, List<CreateContainerResponse> containers) {
-
-        for (CreateContainerResponse container : containers) {
-            TrmsDockerContainer trmsDockerContainer = new TrmsDockerContainer();
-            ArrayList<TrmsDockerContainerPorts> trmsDockerContainerPortsArrayList = new ArrayList<>();
-            ArrayList<TrmsDockerNetworkSettings> trmsDockerNetworkSettingsArrayList = new ArrayList<>();
-
-
-            String id = container.getId();
-            InspectContainerResponse exec = client.inspectContainerCmd(id).exec();
-            Ports ports = exec.getNetworkSettings().getPorts();
-            Map<ExposedPort, Ports.Binding[]> bindings = ports.getBindings();
-
-
-            trmsDockerContainer.setName(exec.getName());
-            trmsDockerContainer.setId64(exec.getId());
-            trmsDockerContainer.setState(exec.getState().getStatus());
-            trmsDockerContainer.setCommand(exec.getPath());
-            trmsDockerContainer.setImageId64(exec.getImageId());
-//            trmsDockerContainer.setImage(exec.);
-            //            2023-09-06T15:10:06.479610547Z
-//            trmsDockerContainer.setCreateTime();
-
-
-            for (Map.Entry<ExposedPort, Ports.Binding[]> exposedPortEntry : bindings.entrySet()) {
-                TrmsDockerContainerPorts port = new TrmsDockerContainerPorts();
-                int PrivatePort = exposedPortEntry.getKey().getPort();
-                List<Ports.Binding> collect = Arrays.stream(exposedPortEntry.getValue()).collect(Collectors.toList());
-                System.out.println("内部端口：" + PrivatePort + "-----映射端口：" + collect.get(0).getHostPortSpec());
-                port.setPrivatePort(PrivatePort);
-                port.setPublicPort(Integer.getInteger(collect.get(0).getHostPortSpec()));
-                trmsDockerContainerPortsArrayList.add(port);
-            }
-            for (Map.Entry<String, ContainerNetwork> stringContainerNetworkEntry : exec.getNetworkSettings().getNetworks().entrySet()) {
-                TrmsDockerNetworkSettings network = new TrmsDockerNetworkSettings();
-                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
-                network.setNetworkName(stringContainerNetworkEntry.getKey());
-                network.setIpAddress(stringContainerNetworkEntry.getValue().getIpAddress());
-                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
-                network.setIpPrefixLen(stringContainerNetworkEntry.getValue().getIpPrefixLen());
-                network.setMacAddress(stringContainerNetworkEntry.getValue().getMacAddress());
-                network.setId64(stringContainerNetworkEntry.getValue().getNetworkID());
-                trmsDockerNetworkSettingsArrayList.add(network);
-            }
-
-        }
-        return null;
+    public static InspectContainerResponse getContainerById(String id) {
+       return client.inspectContainerCmd(id).exec();
     }
+
+//    public static Object getContainerInfo(DockerClient client, List<CreateContainerResponse> containers) {
+//
+//        for (CreateContainerResponse container : containers) {
+//            TrmsDockerContainer trmsDockerContainer = new TrmsDockerContainer();
+//            ArrayList<TrmsDockerContainerPorts> trmsDockerContainerPortsArrayList = new ArrayList<>();
+//            ArrayList<TrmsDockerNetworkSettings> trmsDockerNetworkSettingsArrayList = new ArrayList<>();
+//
+//
+//            String id = container.getId();
+//            InspectContainerResponse exec = client.inspectContainerCmd(id).exec();
+//            Ports ports = exec.getNetworkSettings().getPorts();
+//            Map<ExposedPort, Ports.Binding[]> bindings = ports.getBindings();
+//
+//
+//            trmsDockerContainer.setName(exec.getName());
+//            trmsDockerContainer.setId64(exec.getId());
+//            trmsDockerContainer.setState(exec.getState().getStatus());
+//            trmsDockerContainer.setCommand(exec.getPath());
+//            trmsDockerContainer.setImageId64(exec.getImageId());
+////            trmsDockerContainer.setImage(exec.);
+//            //            2023-09-06T15:10:06.479610547Z
+////            trmsDockerContainer.setCreateTime();
+//
+//
+//            for (Map.Entry<ExposedPort, Ports.Binding[]> exposedPortEntry : bindings.entrySet()) {
+//                TrmsDockerContainerPorts port = new TrmsDockerContainerPorts();
+//                int PrivatePort = exposedPortEntry.getKey().getPort();
+//                List<Ports.Binding> collect = Arrays.stream(exposedPortEntry.getValue()).collect(Collectors.toList());
+//                System.out.println("内部端口：" + PrivatePort + "-----映射端口：" + collect.get(0).getHostPortSpec());
+//                port.setPrivatePort(PrivatePort);
+//                port.setPublicPort(Integer.getInteger(collect.get(0).getHostPortSpec()));
+//                trmsDockerContainerPortsArrayList.add(port);
+//            }
+//            for (Map.Entry<String, ContainerNetwork> stringContainerNetworkEntry : exec.getNetworkSettings().getNetworks().entrySet()) {
+//                TrmsDockerNetworkSettings network = new TrmsDockerNetworkSettings();
+//                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
+//                network.setNetworkName(stringContainerNetworkEntry.getKey());
+//                network.setIpAddress(stringContainerNetworkEntry.getValue().getIpAddress());
+//                network.setGateway(stringContainerNetworkEntry.getValue().getGateway());
+//                network.setIpPrefixLen(stringContainerNetworkEntry.getValue().getIpPrefixLen());
+//                network.setMacAddress(stringContainerNetworkEntry.getValue().getMacAddress());
+//                network.setId64(stringContainerNetworkEntry.getValue().getNetworkID());
+//                trmsDockerNetworkSettingsArrayList.add(network);
+//            }
+//
+//        }
+//        return null;
+//    }
 
     /**
      * 建立连接
@@ -99,11 +108,10 @@ public class DockerUtil {
      * @return 连接
      */
     public static DockerClient connectDocker() {
-        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://192.168.160.100:2375").build();
+//        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://192.168.160.100:2375").build();
+        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375").build();
         Info info = dockerClient.infoCmd().exec();
-        String infoStr = JSONObject.toJSONString(info);
-        System.out.println("docker的环境信息如下：=================");
-        System.out.println(info);
+        log.info("Init Docker Client");
         return dockerClient;
     }
 
@@ -114,7 +122,8 @@ public class DockerUtil {
      * @param name   网络名
      */
     public static void createNetwork(DockerClient client, String name) {
-        client.createNetworkCmd().withName(name).withDriver("bridge").exec();
+
+        client.createNetworkCmd().withName(name).withIpam(new Network.Ipam().withConfig(new Network.Ipam.Config().withSubnet("172.36.5.0/29").withGateway("172.36.5.1"))).withDriver("bridge").exec();
     }
 
     /**
@@ -141,13 +150,22 @@ public class DockerUtil {
     /**
      * 移除容器
      *
-     * @param client        连接
-     * @param containerName 容器名
+     * @param client 连接
+     * @param name   容器名
      * @return 判断
      */
-    public static Boolean removeContainer(DockerClient client, String containerName) {
+    public static Boolean removeContainer(DockerClient client, String name) {
         try {
-            client.removeContainerCmd(containerName).exec();
+            client.removeContainerCmd(name).exec();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static Boolean removeImage(DockerClient client, String name) {
+        try {
+            client.removeImageCmd(name).exec();
             return true;
         } catch (Exception e) {
             return false;
