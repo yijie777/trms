@@ -23,7 +23,7 @@ public interface WebSSHService {
      * @Author: NoCortY
      * @Date: 2020/3/7
      */
-    void initConnection(Integer id);
+    void initConnection(String id);
 
     /**
      * @Description: 处理客户段发的数据
@@ -51,7 +51,7 @@ public interface WebSSHService {
      * @Author: NoCortY
      * @Date: 2020/3/7
      */
-    void close(Integer id);
+    void close(String id);
 
 
 

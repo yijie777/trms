@@ -1,8 +1,9 @@
 package org.jeecg.modules.trms.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jeecg.modules.trms.constant.ConstantPool;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.trms.pojo.HostData;
 import org.jeecg.modules.trms.service.WebSSHService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -12,22 +13,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.jcraft.jsch.JSchException;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
+import java.io.IOException;
+
+import static org.jeecg.modules.trms.util.SSHUtil.oneClickDeployment;
 
 @Controller
 @AllArgsConstructor
 @RequestMapping("/websocket1")
-public class WebSocketController{
+@Api(tags="A WebSocket")
+public class WebSocketController {
     private SimpMessagingTemplate template;
     private WebSSHService webSSHService;
+
     @MessageMapping("/msg")
     public void sendMessage(@RequestBody HostData webSSHData) {
         webSSHService.recvHandle(webSSHData, template);  // 处理发送消息
     }
+
+    @PostMapping("/test1")
+    @ApiOperation(value="一键启动组件", notes="不是自动部署，只有配置完才可以一键启动，这个请求只能在已经建立WebSocket时使用")
+    public Result<String> test(@RequestBody HostData hostData) throws JSchException, IOException {
+        oneClickDeployment( hostData, template);
+        return Result.ok("success");
+    }
+
 }

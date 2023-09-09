@@ -292,3 +292,7 @@ third-app:
       # appSecret
       client-secret: ??
       agent-id: ??
+trms:
+  docker-client:
+    ip: 192.168.160.100
+    port: 2375

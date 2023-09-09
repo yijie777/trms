@@ -25,4 +25,13 @@ public class ConstantPool {
      * 发送指令：命令
      */
     public static final String WEBSSH_OPERATE_COMMAND = "command";
+
+    public static final  String[] KEYWORDS_HA_MASTER = {"DataNode", "DFSZKFailoverController", "JournalNode", "QuorumPeerMain", "NameNode", "ResourceManager", "NodeManager"};
+    public static final  String[] KEYWORDS_HA_SLAVE2 = {"DataNode", "NodeManager", "JournalNode", "QuorumPeerMain"};
+
+    public static final String CHECK_HA_MASTER = "CHECK_HA_MASTER";
+    public static final String CHECK_HA_SLAVE1 = "CHECK_HA_SLAVE1";
+    public static final String CHECK_HA_SLAVE2 = "CHECK_HA_SLAVE2";
+    public static final String START_HA = "START_HA";
+
 }

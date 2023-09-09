@@ -39,11 +39,11 @@ import java.util.concurrent.Executors;
 @Service
 public class WebSSHServiceImpl implements WebSSHService {
     //存放ssh连接信息的map
-    private static Map<Integer, Object> sshMap = new ConcurrentHashMap<>();
+    private static Map<String, Object> sshMap = new ConcurrentHashMap<>();
 
     // 初始化 ssh 连接
     @Override
-    public void initConnection(Integer userId) {
+    public void initConnection(String userId) {
         JSch jSch = new JSch();
         SSHConnectInfo sshConnectInfo = new SSHConnectInfo();
         sshConnectInfo.setjSch(jSch);
@@ -55,7 +55,7 @@ public class WebSSHServiceImpl implements WebSSHService {
         // 连接 ssh：connect 指令
         if (webSSHData!=null && ConstantPool.WEBSSH_OPERATE_CONNECT.equals(webSSHData.getOperate())) {
             //找到刚才存储的ssh连接对象
-            SSHConnectInfo sshConnectInfo = (SSHConnectInfo) sshMap.get(1024);
+            SSHConnectInfo sshConnectInfo = (SSHConnectInfo) sshMap.get(webSSHData.getUserId());
             try {
                 connectToSSH(sshConnectInfo, webSSHData, template);
             } catch (JSchException | IOException e) {
@@ -65,7 +65,7 @@ public class WebSSHServiceImpl implements WebSSHService {
         }
         // 输入命令（把命令输到后台终端）command 指令
         else if (webSSHData!=null && ConstantPool.WEBSSH_OPERATE_COMMAND.equals(webSSHData.getOperate())) {
-            SSHConnectInfo sshConnectInfo = (SSHConnectInfo) sshMap.get(1024);
+            SSHConnectInfo sshConnectInfo = (SSHConnectInfo) sshMap.get(webSSHData.getUserId());
             if (sshConnectInfo != null) {
                 try {
                     transToSSH(sshConnectInfo.getChannel(), webSSHData.getCommand());
@@ -108,6 +108,7 @@ public class WebSSHServiceImpl implements WebSSHService {
             int i = 0;
             //如果没有数据来，线程会一直阻塞在这个地方等待数据。
             while ((i = inputStream.read(buffer)) != -1) {
+//                System.out.println(new String(Arrays.copyOfRange(buffer, 0, i)));
                 template.convertAndSend("/topic/" + webSSHData.getUserId(), new String(Arrays.copyOfRange(buffer, 0, i)));
             }
         } finally {
@@ -135,7 +136,7 @@ public class WebSSHServiceImpl implements WebSSHService {
 
     // 关闭连接
     @Override
-    public void close(Integer userId) {
+    public void close(String userId) {
         SSHConnectInfo sshConnectInfo = (SSHConnectInfo) sshMap.get(userId);
         if (sshConnectInfo != null) {
             //断开连接

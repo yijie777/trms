@@ -1,33 +1,35 @@
 package org.jeecg.modules.trms.util;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.jeecg.modules.trms.config.TrmsBaseConfig;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class DockerUtil {
     public static DockerClient client;
+    @Resource
+    private TrmsBaseConfig trmsBaseConfig;
 
     @PostConstruct
     public void init() {
-        client = connectDocker();
+        client = connectDocker(trmsBaseConfig.getDockerClient().getIp(), trmsBaseConfig.getDockerClient().getPort());
     }
 
     public static void main(String[] args) throws IOException {
-        DockerClient client = connectDocker();
+//        DockerClient client = connectDocker();
 //        List<CreateContainerResponse> containers = createContainers(client, "1");
 //        getContainerInfo(client, containers);
 //        createNetwork(client, "test");
@@ -63,6 +65,7 @@ public class DockerUtil {
 
     /**
      * 返回镜像列表
+     *
      * @return
      */
     public static List<Image> listImages() {
@@ -74,9 +77,9 @@ public class DockerUtil {
      *
      * @return 连接
      */
-    public static DockerClient connectDocker() {
+    public static DockerClient connectDocker(String ip, String host) {
 //        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://192.168.160.100:2375").build();
-        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375").build();
+        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://" + ip + ":" + host).build();
         Info info = dockerClient.infoCmd().exec();
         log.info("Init Docker Client");
         return dockerClient;
@@ -92,10 +95,10 @@ public class DockerUtil {
         client.createNetworkCmd()
                 .withName(name)
                 .withIpam(
-                new Network.Ipam().withConfig(
-                        new Network.Ipam.Config()
-                                .withSubnet("172.36.5.0/29")
-                                .withGateway("172.36.5.1")))
+                        new Network.Ipam().withConfig(
+                                new Network.Ipam.Config()
+                                        .withSubnet("172.36.5.0/29")
+                                        .withGateway("172.36.5.1")))
                 .withDriver("bridge")
                 .exec();
     }

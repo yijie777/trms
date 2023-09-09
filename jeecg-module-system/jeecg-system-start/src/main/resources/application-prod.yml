@@ -166,6 +166,10 @@ mybatis-plus:
 #jeecg专用配置
 minidao:
   base-package: org.jeecg.modules.jmreport.*,org.jeecg.modules.drag.*
+trms:
+  docker-client:
+    ip: localhost
+    port: 2375
 jeecg:
   # 是否启用安全模式
   safeMode: false

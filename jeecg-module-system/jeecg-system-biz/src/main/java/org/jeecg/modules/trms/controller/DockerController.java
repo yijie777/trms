@@ -9,10 +9,7 @@ import com.github.dockerjava.api.model.Ports;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.common.aspect.annotation.AutoLog;
-import org.jeecg.modules.trms.entity.TrmsCourse;
 import org.jeecg.modules.trms.entity.TrmsDockerContainer;
 import org.jeecg.modules.trms.entity.TrmsDockerContainerPorts;
 import org.jeecg.modules.trms.entity.TrmsDockerNetworkSettings;
@@ -20,12 +17,9 @@ import org.jeecg.modules.trms.service.ITrmsDockerContainerPortsService;
 import org.jeecg.modules.trms.service.ITrmsDockerContainerService;
 import org.jeecg.modules.trms.service.ITrmsDockerNetworkSettingsService;
 import org.jeecg.modules.trms.util.DockerUtil;
-import org.jeecg.modules.trms.vo.TrmsDockerContainerPage;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/trms/docker")
-public class DockerContaoller {
+public class DockerController {
     @Autowired
     private ITrmsDockerContainerService trmsDockerContainerService;
     @Autowired
@@ -108,6 +102,5 @@ public class DockerContaoller {
         InspectContainerResponse containerById = DockerUtil.inspectContainer(id);
         return Result.OK(containerById);
     }
-
 
 }
