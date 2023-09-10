@@ -60,11 +60,11 @@ public class TrmsStudentCourse implements Serializable {
     private String containerList;
 
 
-    @ApiModelProperty(value = "课程信息")
+//    @ApiModelProperty(value = "课程信息")
     @TableField(exist = false)
     private TrmsCourse course;
 
-    @ApiModelProperty(value = "容器详细信息")
+//    @ApiModelProperty(value = "容器详细信息")
     @TableField(exist = false)
     private List<InspectContainerResponse> docker;
 }

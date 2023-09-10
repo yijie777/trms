@@ -50,7 +50,7 @@ public class SSHUtil {
             while ((s = br.readLine()) != null) {
                 template.convertAndSend("/topic/"+sshInfo.getUserId(),s+"\n");
             }
-            template.convertAndSend("/topic/"+sshInfo.getUserId(),"\n");
+            template.convertAndSend("/topic/"+sshInfo.getUserId(),"\r\n");
 
         }
 

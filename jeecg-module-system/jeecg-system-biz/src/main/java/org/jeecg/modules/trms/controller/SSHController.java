@@ -28,6 +28,6 @@ public class SSHController {
         LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
         hostData.setUserId(user.getId());
         Boolean aBoolean = automaticCorrection(hostData);
-        return aBoolean ? Result.OK("success") : Result.error("error");
+        return aBoolean ? Result.OK("启动成功") : Result.error("启动失败");
     }
 }

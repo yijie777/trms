@@ -13,6 +13,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.trms.entity.TrmsDockerContainer;
 import org.jeecg.modules.trms.entity.TrmsDockerContainerPorts;
 import org.jeecg.modules.trms.entity.TrmsDockerNetworkSettings;
+import org.jeecg.modules.trms.pojo.ContainerCreateInfo;
 import org.jeecg.modules.trms.service.ITrmsDockerContainerPortsService;
 import org.jeecg.modules.trms.service.ITrmsDockerContainerService;
 import org.jeecg.modules.trms.service.ITrmsDockerNetworkSettingsService;
@@ -40,10 +41,10 @@ public class DockerController {
 //    @AutoLog(value = "容器管理-添加")
 //    @ApiOperation(value = "容器添加", notes = "课程导入时会建立容器")
 //    @RequiresPermissions("trms:trms_docker_container:add")
-    @RequestMapping(value = "/createMaster", method = RequestMethod.POST)
-    public Result<String> createMaster(@RequestBody Object params) {
+    @RequestMapping(value = "/createHA", method = RequestMethod.POST)
+    public Result<String> createHA(@RequestBody ContainerCreateInfo params) {
         DockerClient client = DockerUtil.client;
-        List<CreateContainerResponse> containers = DockerUtil.createContainersHA(client, "1","100net","v3");
+        List<CreateContainerResponse> containers = DockerUtil.createContainersHA(client, params.getId(),params.getNetwork(),params.getTag());
         for (CreateContainerResponse container : containers) {
             TrmsDockerContainer trmsDockerContainer = new TrmsDockerContainer();
             ArrayList<TrmsDockerContainerPorts> trmsDockerContainerPortsArrayList = new ArrayList<>();
