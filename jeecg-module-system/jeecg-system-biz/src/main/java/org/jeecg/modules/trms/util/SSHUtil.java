@@ -77,47 +77,51 @@ public class SSHUtil {
 
         boolean allKeywordsPresent = true;
 
-        if (sshInfo.getOperate().equals(ConstantPool.CHECK_HA_MASTER)) {
-            exec.setCommand("ssh master  \"source /etc/profile; jps\"\n");
-            exec.connect();
-            exec.start();
-            String inStr = consumeInputStream(exec.getInputStream());
-            for (String keyword : KEYWORDS_HA_MASTER) {
-                if (!inStr.contains(keyword)) {
-                    allKeywordsPresent = false;
-                    break;
+        switch (sshInfo.getOperate()) {
+            case ConstantPool.CHECK_HA_MASTER: {
+                exec.setCommand("ssh master  \"source /etc/profile; jps\"\n");
+                exec.connect();
+                exec.start();
+                String inStr = consumeInputStream(exec.getInputStream());
+                for (String keyword : KEYWORDS_HA_MASTER) {
+                    if (!inStr.contains(keyword)) {
+                        allKeywordsPresent = false;
+                        break;
+                    }
                 }
+                break;
             }
-        } else if (sshInfo.getOperate().equals(ConstantPool.CHECK_HA_SLAVE1)) {
-            exec.setCommand("ssh slave1  \"source /etc/profile; jps\"\n");
-            exec.connect();
-            exec.start();
-            String inStr = consumeInputStream(exec.getInputStream());
-            for (String keyword : KEYWORDS_HA_MASTER) {
-                if (!inStr.contains(keyword)) {
-                    allKeywordsPresent = false;
-                    break;
+            case ConstantPool.CHECK_HA_SLAVE1: {
+                exec.setCommand("ssh slave1  \"source /etc/profile; jps\"\n");
+                exec.connect();
+                exec.start();
+                String inStr = consumeInputStream(exec.getInputStream());
+                for (String keyword : KEYWORDS_HA_MASTER) {
+                    if (!inStr.contains(keyword)) {
+                        allKeywordsPresent = false;
+                        break;
+                    }
                 }
+                break;
             }
-        } else if (sshInfo.getOperate().equals(ConstantPool.CHECK_HA_SLAVE2)) {
-            exec.setCommand("ssh slave2  \"source /etc/profile; jps\"\n");
-            exec.connect();
-            exec.start();
-            String inStr = consumeInputStream(exec.getInputStream());
-            for (String keyword : KEYWORDS_HA_SLAVE2) {
-                if (!inStr.contains(keyword)) {
-                    allKeywordsPresent = false;
-                    break;
+            case ConstantPool.CHECK_HA_SLAVE2: {
+                exec.setCommand("ssh slave2  \"source /etc/profile; jps\"\n");
+                exec.connect();
+                exec.start();
+                String inStr = consumeInputStream(exec.getInputStream());
+                for (String keyword : KEYWORDS_HA_SLAVE2) {
+                    if (!inStr.contains(keyword)) {
+                        allKeywordsPresent = false;
+                        break;
+                    }
                 }
+                break;
             }
         }
 
         exec.disconnect();
         session.disconnect();
-        exec.disconnect();
-        session.disconnect();
         return allKeywordsPresent;
-
     }
 
     /**
@@ -147,7 +151,7 @@ public class SSHUtil {
         String s;
         StringBuilder sb = new StringBuilder();
         while ((s = br.readLine()) != null) {
-            System.out.println(s);
+//            System.out.println(s);
             sb.append(s);
         }
         return sb.toString();
